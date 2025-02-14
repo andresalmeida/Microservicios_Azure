@@ -1,0 +1,65 @@
+<!-- ---
+import Welcome from '../components/Welcome.astro';
+import Layout from '../layouts/Layout.astro';
+
+// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
+// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+---
+
+<Layout>
+	<Welcome />
+</Layout> -->
+
+---
+import Layout from '../layouts/Layout.astro';
+import "../styles/global.css";
+---
+
+<Layout>
+  <!-- GIF animado -->
+  <div class="text-center mb-8">
+    <img
+      src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExNGhhYjd5MDI0ZzJmejE5Z2hnaHduOTRqbzliZXp3aDZzbnBrZDNudyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/6XX4V0O8a0xdS/giphy.gif"
+      alt="GIF animado"
+      class="mx-auto rounded-lg shadow-md"
+      style="max-width: 200px;"
+    />
+  </div>
+
+  <!-- Título de bienvenida -->
+  <h2 class="text-3xl font-bold text-center mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
+    Bienvenido a la Gestión de Cursos y Estudiantes
+  </h2>
+  <p class="text-lg text-gray-600 text-center mb-8">Selecciona una opción del menú para comenzar.</p>
+
+  <!-- Secciones -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Sección de Estudiantes -->
+    <a href="/estudiantes/" class="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+      <h3 class="text-xl font-semibold mb-2 text-blue-600">Gestión de Estudiantes</h3>
+      <p class="text-gray-600">Administra la lista de estudiantes.</p>
+    </a>
+
+    <a href="/crearestudiantes/" class="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+      <h3 class="text-xl font-semibold mb-2 text-blue-700">Creación de Estudiantes</h3>
+      <p class="text-gray-600">Agrega nuevos estudiantes y edita existentes.</p>
+    </a>
+
+    <!-- Sección de Cursos -->
+    <a href="/cursos/" class="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+      <h3 class="text-xl font-semibold mb-2 text-purple-600">Gestión de Cursos</h3>
+      <p class="text-gray-600">Administra la lista de cursos.</p>
+    </a>
+
+    <a href="/crearcursos/" class="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+      <h3 class="text-xl font-semibold mb-2 text-purple-700">Creación de Cursos</h3>
+      <p class="text-gray-600">Agrega nuevos cursos.</p>
+    </a>
+
+      <!-- Sección de Matriculas -->
+      <a href="/matriculas/" class="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+        <h3 class="text-xl font-semibold mb-2 text-lime-600">Gestión de Matrículas</h3>
+        <p class="text-gray-600">Administra la lista de matriculados.</p>
+      </a>
+  </div>
+</Layout>

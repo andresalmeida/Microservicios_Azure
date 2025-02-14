@@ -1,0 +1,274 @@
+@import "tailwindcss";
+
+/* Personalizaciones adicionales */
+body {
+  @apply bg-gray-50 text-gray-900;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Efecto de texto con gradiente */
+.text-gradient {
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+/* Estilos personalizados para enlaces */
+a {
+  @apply transition-all duration-300;
+}
+
+a:hover {
+  @apply transform scale-105;
+}
+
+/* Estilos para formularios */
+form {
+  @apply space-y-4;
+}
+
+input,
+textarea,
+select {
+  @apply w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all;
+}
+
+input[type="submit"],
+button[type="submit"] {
+  @apply bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-all;
+}
+
+/* Estilos para botones */
+button {
+  @apply px-4 py-2 rounded-lg transition-all duration-300;
+}
+
+button.primary {
+  @apply bg-blue-600 text-white hover:bg-blue-700;
+}
+
+button.secondary {
+  @apply bg-purple-600 text-white hover:bg-purple-700;
+}
+
+button.danger {
+  @apply bg-red-600 text-white hover:bg-red-700;
+}
+
+/* Estilos para tarjetas */
+.card {
+  @apply bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow;
+}
+
+/* Efectos hover para tarjetas */
+.card:hover {
+  @apply transform scale-105;
+}
+
+/* Animación para botones */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.pulse {
+  animation: pulse 1.5s infinite;
+}
+
+/* Estilos para modales */
+.modal {
+  @apply fixed inset-0 bg-black/50 flex items-center justify-center z-50; /* Alternativa temporal para bg-opacity-50 */
+}
+
+.modal-content {
+  @apply bg-white rounded-lg shadow-lg p-6 w-96;
+}
+
+.modal-header {
+  @apply text-xl font-semibold mb-4;
+}
+
+.modal-body {
+  @apply space-y-4;
+}
+
+.modal-footer {
+  @apply flex justify-end space-x-2;
+}
+
+/* Estilos para botones de modales */
+.modal-button {
+  @apply px-4 py-2 rounded-lg transition-all duration-300;
+}
+
+.modal-button.confirm {
+  @apply bg-blue-600 text-white hover:bg-blue-700;
+}
+
+.modal-button.cancel {
+  @apply bg-gray-500 text-white hover:bg-gray-600;
+}
+
+.modal-button.danger {
+  @apply bg-red-600 text-white hover:bg-red-700;
+}
+
+/* Estilos para listas */
+.list {
+  @apply space-y-4;
+}
+
+.list-item {
+  @apply p-4 border rounded-lg shadow-sm;
+}
+
+/* Estilos para enlaces de editar/eliminar */
+.edit-link {
+  @apply text-blue-500 hover:text-blue-700 transition-all;
+}
+
+.delete-link {
+  @apply text-red-500 hover:text-red-700 transition-all;
+}
+
+/* Estilos para mensajes de confirmación */
+.confirmation-message {
+  @apply text-center;
+}
+
+.confirmation-message h3 {
+  @apply text-xl font-semibold mb-2;
+}
+
+.confirmation-message p {
+  @apply text-gray-500 mb-4;
+}
+
+/* Estilos para GIFs en modales */
+.modal-gif {
+  @apply mx-auto mb-4 rounded-lg;
+  max-width: 100px;
+}
+
+/* Estilos para botones con íconos */
+.icon-button {
+  @apply flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300;
+}
+
+.icon-button.primary {
+  @apply bg-blue-600 text-white hover:bg-blue-700;
+}
+
+.icon-button.danger {
+  @apply bg-red-600 text-white hover:bg-red-700;
+}
+
+/* Estilos para tablas */
+.table {
+  @apply w-full border-collapse;
+}
+
+.table th {
+  @apply bg-gray-100 p-3 text-left;
+}
+
+.table td {
+  @apply p-3 border-t border-gray-200;
+}
+
+.table tr:hover {
+  @apply bg-gray-50;
+}
+
+/* Estilos para inputs con íconos */
+.input-with-icon {
+  @apply relative;
+}
+
+.input-with-icon input {
+  @apply pl-10;
+}
+
+.input-with-icon .icon {
+  @apply absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400;
+}
+
+/* Estilos para alertas */
+.alert {
+  @apply p-4 rounded-lg;
+}
+
+.alert.success {
+  @apply bg-green-100 text-green-700;
+}
+
+.alert.error {
+  @apply bg-red-100 text-red-700;
+}
+
+.alert.warning {
+  @apply bg-yellow-100 text-yellow-700;
+}
+
+.alert.info {
+  @apply bg-blue-100 text-blue-700;
+}
+
+/* Estilos para sombras personalizadas */
+.shadow-custom {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Estilos para transiciones suaves */
+.transition-smooth {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+/* Estilos para textos destacados */
+.highlight {
+  @apply bg-yellow-100 px-2 py-1 rounded;
+}
+
+/* Estilos para imágenes responsivas */
+.responsive-image {
+  @apply w-full h-auto rounded-lg;
+}
+
+/* Estilos para contenedores flexibles */
+.flex-container {
+  @apply flex flex-wrap justify-center gap-4;
+}
+
+.flex-item {
+  @apply flex-1 min-w-[200px] max-w-[300px];
+}
+
+/* Estilos para títulos */
+.section-title {
+  @apply text-2xl font-bold mb-4;
+}
+
+/* Estilos para separadores */
+.divider {
+  @apply border-t border-gray-200 my-6;
+}

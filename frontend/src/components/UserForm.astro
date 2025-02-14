@@ -1,0 +1,151 @@
+---
+import BackToHome from '../components/BackToHome.astro';
+---
+
+<BackToHome />
+
+<form id="userForm" class="space-y-4">
+  <!-- Nombre -->
+  <div>
+    <label for="nombre" class="block">Nombre:</label>
+    <input
+      type="text"
+      id="nombre"
+      name="nombre"
+      class="p-2 border rounded w-full"
+      required
+      pattern="[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+"
+      title="Solo se permiten letras y espacios."
+    />
+  </div>
+
+  <!-- Apellido -->
+  <div>
+    <label for="apellido" class="block">Apellido:</label>
+    <input
+      type="text"
+      id="apellido"
+      name="apellido"
+      class="p-2 border rounded w-full"
+      required
+      pattern="[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+"
+      title="Solo se permiten letras y espacios."
+    />
+  </div>
+
+  <!-- Email -->
+  <div>
+    <label for="email" class="block">Email:</label>
+    <input
+      type="email"
+      id="email"
+      name="email"
+      class="p-2 border rounded w-full"
+      required
+    />
+  </div>
+
+  <!-- Fecha de Nacimiento -->
+  <div>
+    <label for="fechaNacimiento" class="block">Fecha de Nacimiento:</label>
+    <input
+      type="date"
+      id="fechaNacimiento"
+      name="fechaNacimiento"
+      class="p-2 border rounded w-full"
+      required
+      min="1900-01-01"
+      max={new Date().toISOString().split('T')[0]}
+      title="La fecha debe estar entre 1900 y el día de hoy."
+    />
+  </div>
+
+  <!-- Teléfono -->
+  <div>
+    <label for="telefono" class="block">Teléfono:</label>
+    <input
+      type="tel"
+      id="telefono"
+      name="telefono"
+      class="p-2 border rounded w-full"
+      required
+      pattern="09[0-9]{8}"
+      title="Ingrese un número válido de Ecuador: fijo (9 dígitos) o celular (10 dígitos)"
+    />
+  </div>
+
+  <!-- Botón de envío -->
+  <button type="submit" class="bg-blue-500 text-white p-2 rounded">
+    Agregar Estudiante
+  </button>
+</form>
+
+<!-- Modal de Confirmación -->
+<div id="confirmationModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg shadow-lg p-6 w-96 text-center">
+    <!-- GIF de confirmación -->
+    <img
+      src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExMWo5MzVkeGFlaTY5M24xeWgzY3BnaWxqbG4wZGE0YzUxamp5czhmayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/yNibaJbCHYV7FIF7PU/giphy.gif"
+      alt="GIF de confirmación"
+      class="mx-auto mb-4 rounded-lg"
+      style="max-width: 100px;"
+    />
+    <h3 class="text-xl font-semibold text-blue-600 mb-2">¡Estudiante registrado con éxito!</h3>
+    <p class="text-gray-500 mb-4">El estudiante ha sido registrado correctamente.</p>
+    <button
+      id="closeModalButton"
+      class="bg-blue-500 text-white font-medium py-2 px-4 rounded-md hover:bg-blue-600 transition duration-200"
+    >
+      Cerrar
+    </button>
+  </div>
+</div>
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('userForm');
+    const modal = document.getElementById('confirmationModal');
+    const closeModalButton = document.getElementById('closeModalButton');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Validar el formulario antes de enviar
+      if (!form.checkValidity()) {
+        alert('Por favor, completa el formulario correctamente.');
+        return;
+      }
+
+      const data = new FormData(form);
+      const estudiante = {
+        nombre: data.get('nombre'),
+        apellido: data.get('apellido'),
+        email: data.get('email'),
+        fechaNacimiento: data.get('fechaNacimiento'),
+        telefono: data.get('telefono'),
+      };
+
+      try {
+        const response = await fetch('http://localhost:8002/api/estudiantes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(estudiante),
+        });
+
+        if (response.ok) {
+          // Mostrar el modal de confirmación
+          modal.classList.remove('hidden');
+
+          // Redirigir al index después de cerrar el modal
+          closeModalButton.addEventListener('click', () => {
+            window.location.href = '/estudiantes/';
+          });
+        } else {
+          throw new Error('Error al crear el estudiante');
+        }
+      } catch (error) {
+        alert(error instanceof Error ? error.message : 'Ocurrió un error inesperado');
+      }
+    });
+  });
+</script>

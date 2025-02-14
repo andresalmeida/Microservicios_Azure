@@ -1,0 +1,156 @@
+---
+import BackToHome from '../components/BackToHome.astro';
+---
+
+<BackToHome />
+
+<form id="courseForm" class="space-y-4">
+  <!-- Nombre del curso -->
+  <div>
+    <label for="nombre" class="block">Nombre del curso:</label>
+    <input
+      type="text"
+      id="nombre"
+      name="nombre"
+      class="p-2 border rounded w-full"
+      required
+      pattern="^[ A-Za-záéíóúÁÉÍÓÚñÑ]+$"
+      title="Solo se permiten letras y espacios."
+    />
+  </div>
+
+  <!-- Descripción -->
+  <div>
+    <label for="descripcion" class="block">Descripción:</label>
+    <input
+      type="text"
+      id="descripcion"
+      name="descripcion"
+      class="p-2 border rounded w-full"
+      required
+      pattern="^[ A-Za-záéíóúÁÉÍÓÚñÑ]+$"
+      title="Solo se permiten letras y espacios."
+    />
+  </div>
+
+  <!-- Créditos -->
+  <div>
+    <label for="creditos" class="block">Créditos:</label>
+    <input
+      type="number"
+      id="creditos"
+      name="creditos"
+      class="p-2 border rounded w-full"
+      required
+      min="1"
+      max="5"
+      title="Los créditos deben estar entre 1 y 5"
+    />
+  </div>
+
+  <!-- Botón de envío -->
+  <button type="submit" class="bg-blue-500 text-white p-2 rounded">
+    Crear Curso
+  </button>
+</form>
+
+<!-- Modal de Confirmación -->
+<div id="confirmationModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg shadow-lg p-6 w-96 text-center">
+    <!-- GIF de confirmación -->
+    <img
+      src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExZTY0bW9taTFoZ2cyMmNtN2J1dDA0YXFoNXpjazd1ZW1mbzZjc3E1MyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/qJzZ4APiDZQuJDY7vh/giphy.gif"
+      alt="GIF de confirmación"
+      class="mx-auto mb-4 rounded-lg"
+      style="max-width: 100px;"
+    />
+    <h3 class="text-xl font-semibold text-blue-600 mb-2">¡Curso creado con éxito!</h3>
+    <p class="text-gray-500 mb-4">El curso ha sido registrado correctamente.</p>
+    <button
+      id="closeModalButton"
+      class="bg-blue-500 text-white font-medium py-2 px-4 rounded-md hover:bg-blue-600 transition duration-200"
+    >
+      Cerrar
+    </button>
+  </div>
+</div>
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('courseForm');
+    const modal = document.getElementById('confirmationModal');
+    const closeModalButton = document.getElementById('closeModalButton');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const data = new FormData(form);
+      const nuevoCurso = {
+        nombre: data.get('nombre'),
+        descripcion: data.get('descripcion'),
+        creditos: Number(data.get('creditos')),
+      };
+
+      try {
+        const response = await fetch('http://localhost:8003/api/cursos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(nuevoCurso),
+        });
+
+        if (response.ok) {
+          // Mostrar el modal de confirmación
+          modal.classList.remove('hidden');
+
+          // Redirigir al index después de cerrar el modal
+          closeModalButton.addEventListener('click', () => {
+            window.location.href = '/cursos';
+          });
+        } else {
+          throw new Error('Error al crear el curso');
+        }
+      } catch (error) {
+        alert(error instanceof Error ? error.message : 'Ocurrió un error inesperado');
+      }
+    });
+  });
+</script>
+
+<!-- 
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('courseForm');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const data = new FormData(form);
+      const nuevoCurso = {
+        nombre: data.get('nombre'),
+        descripcion: data.get('descripcion'),
+        creditos: Number(data.get('creditos')),
+      };
+
+      try {
+        console.log('Enviando solicitud para crear curso:', nuevoCurso);
+        const response = await fetch('http://localhost:8003/api/cursos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(nuevoCurso),
+        });
+
+        if (response.ok) {
+          alert('Curso creado exitosamente');
+          window.location.reload(); // Recargar la página para ver los cambios
+        } else {
+          console.error('Error en la respuesta del servidor:', response.status, response.statusText);
+          throw new Error('Error al crear el curso');
+        }
+      } catch (error) {
+        console.error('Error al crear el curso:', error);
+        alert(error instanceof Error ? error.message : 'Ocurrió un error inesperado');
+      }
+    });
+  });
+</script> -->

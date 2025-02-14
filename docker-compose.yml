@@ -1,0 +1,190 @@
+# ORIGINAL
+
+#version: '3.8'
+#
+#services:
+#  micro-cursos:
+#    build:
+#      context: ./micro-cursos
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8003:8003"
+#    depends_on:
+#      - mysql
+#    environment:
+#      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/sisdb2025
+#      - SPRING_DATASOURCE_USERNAME=root
+#      - SPRING_DATASOURCE_PASSWORD=rootpassword
+#      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+#      - TZ=America/Guayaquil # Ajustar la zona horaria de Ecuador
+#      - ESTUDIANTES_URL=http://micro-estudiantes:8002/api/estudiantes
+#    networks:
+#      - host
+#
+#  micro-estudiantes:
+#    build:
+#      context: ./micro-estudiantes
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8002:8002"
+#    depends_on:
+#      - mysql
+#    environment:
+#      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/sisdb2025
+#      - SPRING_DATASOURCE_USERNAME=root
+#      - SPRING_DATASOURCE_PASSWORD=rootpassword
+#      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+#      - TZ=America/Guayaquil # Ajustar la zona horaria de Ecuador
+#    networks:
+#      - host
+#
+#  mysql:
+#    image: mysql:latest
+#    container_name: mysql-micro-spring
+#    ports:
+#      - "3307:3306"
+#    environment:
+#      MYSQL_ROOT_PASSWORD: rootpassword
+#      TZ: "America/Guayaquil" #Ajustar a la zona horaria de Ecuador
+#    volumes:
+#      - mysql-data:/var/lib/mysql
+#    networks:
+#      - host
+#
+#networks:
+#  host:
+#    driver: bridge
+#
+#volumes:
+#  mysql-data:
+#    driver: local
+
+# SEGUNDA VERSION CON .env GENERAL
+
+#version: '3.8'
+#
+#services:
+#  micro-cursos:
+#    build:
+#      context: ./micro-cursos
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8003:8003"
+#    depends_on:
+#      - mysql
+#      - micro-estudiantes
+#    environment:
+#      - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
+#      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
+#      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+#      - SPRING_JPA_HIBERNATE_DDL_AUTO=${SPRING_JPA_HIBERNATE_DDL_AUTO}
+#      - TZ=${TZ}
+#      - ESTUDIANTES_URL=${ESTUDIANTES_URL}
+#    networks:
+#      - host
+#
+#  micro-estudiantes:
+#    build:
+#      context: ./micro-estudiantes
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8002:8002"
+#    depends_on:
+#      - mysql
+#    environment:
+#      - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
+#      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
+#      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+#      - SPRING_JPA_HIBERNATE_DDL_AUTO=${SPRING_JPA_HIBERNATE_DDL_AUTO}
+#      - TZ=${TZ}
+#    networks:
+#      - host
+#
+#  mysql:
+#    image: mysql:latest
+#    container_name: mysql-micro-spring
+#    ports:
+#      - "3307:3306"
+#    environment:
+#      - MYSQL_ROOT_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+#      - TZ=${TZ}
+#    volumes:
+#      - mysql-data:/var/lib/mysql
+#    networks:
+#      - host
+#
+#networks:
+#  host:
+#    driver: bridge
+#
+#volumes:
+#  mysql-data:
+#    driver: local
+
+# TERCERA VERSION CON .env POR CADA MICROSERVICIO
+
+version: '3.8'
+
+services:
+  micro-cursos:
+    build:
+      context: ./micro-cursos
+      dockerfile: Dockerfile
+    ports:
+      - "8003:8003"
+    depends_on:
+      - mysql
+      - micro-estudiantes
+    env_file:
+      - ./micro-cursos/.env
+    networks:
+      - host
+
+  micro-estudiantes:
+    build:
+      context: ./micro-estudiantes
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8002"
+    depends_on:
+      - mysql
+    env_file:
+      - ./micro-estudiantes/.env
+    networks:
+      - host
+
+  mysql:
+    image: mysql:latest
+    container_name: mysql-micro-spring
+    ports:
+      - "3307:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - TZ=America/Guayaquil
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - host
+
+  frontend:
+    build:
+      context: ./frontend  # Esta es la carpeta 'frontend' que debe estar en la raíz del proyecto
+      dockerfile: Dockerfile 
+      network: host # Asegúrate de que el archivo Dockerfile se llame correctamente
+    ports:
+      - "4321:80"
+    env_file:
+      - ./frontend/.env
+    depends_on:
+      - micro-cursos
+      - micro-estudiantes
+    networks:
+      - host
+
+networks:
+  host:
+    driver: bridge
+
+volumes:
+  mysql-data:
+    driver: local

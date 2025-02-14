@@ -1,0 +1,21 @@
+<!-- ---
+import MainLayout from '../layouts/Layout.astro';
+import UserList from '../components/UserList.astro';
+import UserForm from '../components/UserForm.astro';
+---
+<MainLayout>
+  <h2 class="text-xl font-bold mb-4">Gestión de Estudiantes</h2>
+  <UserForm />
+  <UserList />
+</MainLayout> -->
+
+---
+import MainLayout from '../layouts/Layout.astro';
+import UserList from '../components/UserList.astro';
+import "../styles/global.css";
+---
+
+<MainLayout>
+  <h2 class="text-3xl font-bold text-center mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">Gestión de Estudiantes</h2>
+  <UserList />
+</MainLayout>

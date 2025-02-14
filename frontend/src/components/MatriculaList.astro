@@ -1,0 +1,181 @@
+---
+import { getCursos } from '../services/api';
+import BackToHome from '../components/BackToHome.astro';
+
+// Obtener la lista de cursos
+const cursos = await getCursos();
+---
+
+<BackToHome />
+
+<ul class="space-y-4">
+  {cursos.map((curso) => (
+    <li class="p-4 border rounded-lg shadow-sm">
+      <div class="flex justify-between items-center">
+        <div>
+          <h3 class="text-lg font-semibold">{curso.nombre}</h3>
+          <p class="text-gray-600">{curso.descripcion}</p>
+          <p class="text-gray-600">Créditos: {curso.creditos}</p>
+          <!-- Mostrar estudiantes matriculados -->
+          {curso.cursoEstudiantes && curso.cursoEstudiantes.length > 0 && (
+            <div class="mt-2">
+              <h4 class="text-sm font-semibold text-gray-700">Estudiantes matriculados:</h4>
+              <ul class="list-disc list-inside">
+                {curso.cursoEstudiantes.map((estudiante) => (
+                  <li class="text-sm text-gray-600">
+                    Estudiante ID: {estudiante.estudiante_id}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      </div>
+    </li>
+  ))}
+</ul>
+
+
+<!-- Formulario para matricular un estudiante -->
+<form id="matricularForm" class="mt-8">
+  <h3 class="text-lg font-semibold">Matricular Estudiante</h3>
+  <div class="space-y-4">
+    <div>
+      <label for="cursoIdMatricular" class="block text-sm font-medium text-gray-700">ID del Curso</label>
+      <input type="number" id="cursoIdMatricular" name="cursoIdMatricular" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+    </div>
+    <div>
+      <label for="estudianteIdMatricular" class="block text-sm font-medium text-gray-700">ID del Estudiante</label>
+      <input type="number" id="estudianteIdMatricular" name="estudianteIdMatricular" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+    </div>
+    <button type="submit" class="bg-blue-500 text-white p-2 rounded">Matricular</button>
+  </div>
+</form>
+
+<!-- Formulario para desmatricular un estudiante -->
+<form id="desmatricularForm" class="mt-8">
+  <h3 class="text-lg font-semibold">Desmatricular Estudiante</h3>
+  <div class="space-y-4">
+    <div>
+      <label for="cursoIdDesmatricular" class="block text-sm font-medium text-gray-700">ID del Curso</label>
+      <input type="number" id="cursoIdDesmatricular" name="cursoIdDesmatricular" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+    </div>
+    <div>
+      <label for="estudianteIdDesmatricular" class="block text-sm font-medium text-gray-700">ID del Estudiante</label>
+      <input type="number" id="estudianteIdDesmatricular" name="estudianteIdDesmatricular" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+    </div>
+    <button type="submit" class="bg-red-500 text-white p-2 rounded">Desmatricular</button>
+  </div>
+</form>
+
+<!-- Modal de Confirmación de Matriculación -->
+<div id="matricularModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg shadow-lg p-6 w-96 text-center">
+    <!-- GIF de confirmación -->
+    <img
+      src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExdzhwaTdmNmYxcmhhem9xeWZienpjeDdrenczZmhkczdta3B6bDcyMCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ule4vhcY1xEKQ/giphy.gif"
+      alt="GIF de confirmación"
+      class="mx-auto mb-4 rounded-lg"
+      style="max-width: 100px;"
+    />
+    <h3 class="text-xl font-semibold text-blue-600 mb-2">¡Estudiante matriculado con éxito!</h3>
+    <p class="text-gray-500 mb-4">El estudiante ha sido matriculado correctamente.</p>
+    <button
+      id="closeMatricularModalButton"
+      class="bg-blue-500 text-white font-medium py-2 px-4 rounded-md hover:bg-blue-600 transition duration-200"
+    >
+      Cerrar
+    </button>
+  </div>
+</div>
+
+<!-- Modal de Confirmación de Desmatriculación -->
+<div id="desmatricularModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg shadow-lg p-6 w-96 text-center">
+    <!-- GIF de confirmación -->
+    <img
+      src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExbnU5cmtyeDJwZTV2dDgycmYxZ3dnNHV0ZHU3Zmt3bTVyZ3V2Zm8yeSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QrXEaBLCewtDKotHzo/giphy.gif"
+      alt="GIF de confirmación"
+      class="mx-auto mb-4 rounded-lg"
+      style="max-width: 100px;"
+    />
+    <h3 class="text-xl font-semibold text-red-600 mb-2">¡Estudiante desmatriculado con éxito!</h3>
+    <p class="text-gray-500 mb-4">El estudiante ha sido desmatriculado correctamente.</p>
+    <button
+      id="closeDesmatricularModalButton"
+      class="bg-red-500 text-white font-medium py-2 px-4 rounded-md hover:bg-red-600 transition duration-200"
+    >
+      Cerrar
+    </button>
+  </div>
+</div>
+
+<script is:inline>
+  // Definir las funciones directamente en el script en línea
+  const matricularEstudianteEnCurso = async (cursoId, estudiante) => {
+    const response = await fetch(`http://localhost:8003/api/cursos/matricular-estudiante/${cursoId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(estudiante),
+    });
+    if (!response.ok) throw new Error("Error al matricular el estudiante al curso");
+    return await response.json();
+  };
+
+  const desmatricularEstudianteDeCurso = async (cursoId, estudianteId) => {
+    const response = await fetch(`http://localhost:8003/api/cursos/desmatricular-estudiante/${cursoId}/estudiante/${estudianteId}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: estudianteId }),
+    });
+    if (!response.ok) throw new Error("Error al desmatricular el estudiante del curso");
+    return await response.json();
+  };
+
+  // Manejar el formulario de matricular
+  document.getElementById('matricularForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const cursoId = document.getElementById('cursoIdMatricular').value;
+    const estudianteId = document.getElementById('estudianteIdMatricular').value;
+
+    try {
+      const estudiante = { id: estudianteId }; // Crear un objeto estudiante con el ID
+      await matricularEstudianteEnCurso(cursoId, estudiante);
+
+      // Mostrar el modal de confirmación de matriculación
+      const matricularModal = document.getElementById('matricularModal');
+      matricularModal.classList.remove('hidden');
+
+      // Cerrar el modal y recargar la página
+      document.getElementById('closeMatricularModalButton').addEventListener('click', () => {
+        matricularModal.classList.add('hidden');
+        location.reload(); // Recargar la página para ver los cambios
+      });
+    } catch (error) {
+      alert(error.message);
+    }
+  });
+
+  // Manejar el formulario de desmatricular
+  document.getElementById('desmatricularForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const cursoId = document.getElementById('cursoIdDesmatricular').value;
+    const estudianteId = document.getElementById('estudianteIdDesmatricular').value;
+
+    try {
+      await desmatricularEstudianteDeCurso(cursoId, estudianteId);
+
+      // Mostrar el modal de confirmación de desmatriculación
+      const desmatricularModal = document.getElementById('desmatricularModal');
+      desmatricularModal.classList.remove('hidden');
+
+      // Cerrar el modal y recargar la página
+      document.getElementById('closeDesmatricularModalButton').addEventListener('click', () => {
+        desmatricularModal.classList.add('hidden');
+        location.reload(); // Recargar la página para ver los cambios
+      });
+    } catch (error) {
+      alert(error.message);
+    }
+  });
+</script>
