@@ -35,8 +35,8 @@ import BackToHome from '../components/BackToHome.astro';
               <p class="text-gray-600">Créditos: ${curso.creditos}</p>
             </div>
             <div class="flex space-x-2">
-              <button data-id="${curso.id}" class="flex items-center space-x-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all edit-button">
-                Editar
+              <button data-id="${curso.id}"class="flex items-center space-x-2 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-all delete-button">
+            Eliminar
               </button>
             </div>
           </div>
@@ -94,53 +94,78 @@ import BackToHome from '../components/BackToHome.astro';
 </div>
 
 <script is:inline>
-  document.addEventListener('DOMContentLoaded', () => {
-    const deleteButtons = document.querySelectorAll('.delete-button');
-    const confirmDeleteModal = document.getElementById('confirmDeleteModal');
-    const deleteConfirmationModal = document.getElementById('deleteConfirmationModal');
-    const cancelDeleteButton = document.getElementById('cancelDeleteButton');
-    const confirmDeleteButton = document.getElementById('confirmDeleteButton');
-    const closeDeleteConfirmationModalButton = document.getElementById('closeDeleteConfirmationModalButton');
+  document.addEventListener("DOMContentLoaded", async () => {
+    const listaCursos = document.getElementById("cursos-list");
+    const API_URL = "http://localhost:8003/api/cursos";
 
-    // Variable para almacenar el ID del curso que se está eliminando
-    let cursoId;
+    try {
+      const response = await fetch(API_URL);
+      if (!response.ok) throw new Error("Error al obtener los cursos");
 
-    // Manejar el clic en el botón "Eliminar"
-    deleteButtons.forEach((button) => {
-      button.addEventListener('click', () => {
-        cursoId = button.getAttribute('data-id');
-        confirmDeleteModal.classList.remove('hidden'); // Mostrar el modal de confirmación
-      });
-    });
+      const cursos = await response.json();
 
-    // Cancelar la eliminación
-    cancelDeleteButton.addEventListener('click', () => {
-      confirmDeleteModal.classList.add('hidden'); // Ocultar el modal de confirmación
-    });
-
-    // Confirmar la eliminación
-    confirmDeleteButton.addEventListener('click', async () => {
-      try {
-        const response = await fetch(`http://localhost:8003/api/cursos/${cursoId}`, {
-          method: 'DELETE',
-        });
-
-        if (response.ok) {
-          // Mostrar el modal de confirmación de eliminación exitosa
-          confirmDeleteModal.classList.add('hidden');
-          deleteConfirmationModal.classList.remove('hidden');
-        } else {
-          throw new Error('Error al eliminar el curso');
-        }
-      } catch (error) {
-        alert(error instanceof Error ? error.message : 'Ocurrió un error inesperado');
+      if (!Array.isArray(cursos) || cursos.length === 0) {
+        listaCursos.innerHTML = `<p class="text-gray-500">No hay cursos registrados.</p>`;
+        return;
       }
-    });
 
-    // Cerrar el modal de confirmación de eliminación
-    closeDeleteConfirmationModalButton.addEventListener('click', () => {
-      deleteConfirmationModal.classList.add('hidden');
-      window.location.reload(); // Recargar la página para ver los cambios
-    });
+      listaCursos.innerHTML = cursos.map(curso => `
+        <li class="p-4 border rounded-lg shadow-sm">
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="text-lg font-semibold">${curso.nombre}</h3>
+              <p class="text-gray-600">${curso.descripcion}</p>
+              <p class="text-gray-600">Créditos: ${curso.creditos}</p>
+            </div>
+            <div class="flex space-x-2">
+              <button data-id="${curso.id}" class="delete-button bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-all">
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </li>
+      `).join("");
+
+      let cursoId = null;
+
+      // Delegación de eventos para los botones de eliminar
+      listaCursos.addEventListener("click", (event) => {
+        const target = event.target;
+
+        if (target.classList.contains("delete-button")) {
+          cursoId = target.getAttribute("data-id");
+          document.getElementById("confirmDeleteModal").classList.remove("hidden");
+        }
+      });
+
+      // Cancelar la eliminación
+      document.getElementById("cancelDeleteButton").addEventListener("click", () => {
+        document.getElementById("confirmDeleteModal").classList.add("hidden");
+      });
+
+      // Confirmar la eliminación
+      document.getElementById("confirmDeleteButton").addEventListener("click", async () => {
+        try {
+          const response = await fetch(`${API_URL}/${cursoId}`, { method: "DELETE" });
+
+          if (response.ok) {
+            document.getElementById("confirmDeleteModal").classList.add("hidden");
+            document.getElementById("deleteConfirmationModal").classList.remove("hidden");
+
+            document.getElementById("closeDeleteConfirmationModalButton").addEventListener("click", () => {
+              document.getElementById("deleteConfirmationModal").classList.add("hidden");
+              window.location.reload();
+            });
+          } else {
+            throw new Error("Error al eliminar el curso");
+          }
+        } catch (error) {
+          alert(error instanceof Error ? error.message : "Ocurrió un error inesperado");
+        }
+      });
+
+    } catch (error) {
+      listaCursos.innerHTML = `<p class="text-red-500">Error al cargar los cursos.</p>`;
+    }
   });
 </script>

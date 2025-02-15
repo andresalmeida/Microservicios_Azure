@@ -203,134 +203,139 @@ import BackToHome from '../components/BackToHome.astro';
 </div>
 
 <script is:inline>
-  document.addEventListener('DOMContentLoaded', () => {
-    const editButtons = document.querySelectorAll('.edit-button');
-    const deleteButtons = document.querySelectorAll('.delete-button');
-    const editModal = document.getElementById('editModal');
-    const editConfirmationModal = document.getElementById('editConfirmationModal');
-    const deleteConfirmationModal = document.getElementById('deleteConfirmationModal');
-    const confirmDeleteModal = document.getElementById('confirmDeleteModal');
-    const closeEditModalButton = document.getElementById('closeEditModalButton');
-    const closeEditConfirmationModalButton = document.getElementById('closeEditConfirmationModalButton');
-    const closeDeleteConfirmationModalButton = document.getElementById('closeDeleteConfirmationModalButton');
-    const cancelDeleteButton = document.getElementById('cancelDeleteButton');
-    const confirmDeleteButton = document.getElementById('confirmDeleteButton');
-    const editForm = document.getElementById('editForm');
+  document.addEventListener("DOMContentLoaded", async () => {
+    const listaEstudiantes = document.getElementById("estudiantes-list");
 
-    // Variables para almacenar el ID del estudiante que se está editando o eliminando
-    let estudianteId;
+    // Definir la URL fija en localhost
+    const API_URL = "http://localhost:8002/api/estudiantes";
 
-    // Manejar el clic en el botón "Editar"
-    editButtons.forEach((button) => {
-      button.addEventListener('click', async () => {
-        estudianteId = button.getAttribute('data-id');
+    try {
+      const response = await fetch(API_URL);
+      if (!response.ok) throw new Error("Error al obtener los estudiantes");
 
-        // Obtener los datos del estudiante
+      const estudiantes = await response.json();
+
+      if (!Array.isArray(estudiantes) || estudiantes.length === 0) {
+        listaEstudiantes.innerHTML = `<p class="text-gray-500">No hay estudiantes registrados.</p>`;
+        return;
+      }
+
+      listaEstudiantes.innerHTML = estudiantes.map(estudiante => `
+        <li class="p-4 border rounded-lg shadow-sm">
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="text-lg font-semibold">${estudiante.nombre} ${estudiante.apellido}</h3>
+              <p class="text-gray-600">${estudiante.email}</p>
+              <p class="text-gray-600">Teléfono: ${estudiante.telefono}</p>
+            </div>
+            <div class="flex space-x-2">
+              <button data-id="${estudiante.id}" class="edit-button bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all">
+                Editar
+              </button>
+              <button data-id="${estudiante.id}" class="delete-button bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-all">
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </li>
+      `).join("");
+
+      let estudianteId = null;
+
+      // Delegación de eventos para los botones de editar y eliminar
+      listaEstudiantes.addEventListener('click', async (event) => {
+        const target = event.target;
+
+        // **Editar Estudiante**
+        if (target.classList.contains('edit-button')) {
+          estudianteId = target.getAttribute('data-id');
+
+          try {
+            const response = await fetch(`${API_URL}/${estudianteId}`);
+            const estudiante = await response.json();
+
+            document.getElementById('editNombre').value = estudiante.nombre;
+            document.getElementById('editApellido').value = estudiante.apellido;
+            document.getElementById('editEmail').value = estudiante.email;
+            document.getElementById('editFechaNacimiento').value = estudiante.fechaNacimiento;
+            document.getElementById('editTelefono').value = estudiante.telefono;
+
+            document.getElementById('editModal').classList.remove('hidden');
+          } catch (error) {
+            alert('Error al cargar los datos del estudiante');
+          }
+        }
+
+        // **Eliminar Estudiante**
+        if (target.classList.contains('delete-button')) {
+          estudianteId = target.getAttribute('data-id');
+          document.getElementById('confirmDeleteModal').classList.remove('hidden');
+
+          document.getElementById('confirmDeleteButton').onclick = async () => {
+            try {
+              const response = await fetch(`${API_URL}/${estudianteId}`, { method: 'DELETE' });
+
+              if (response.ok) {
+                document.getElementById('confirmDeleteModal').classList.add('hidden');
+                document.getElementById('deleteConfirmationModal').classList.remove('hidden');
+
+                document.getElementById('closeDeleteConfirmationModalButton').onclick = () => {
+                  document.getElementById('deleteConfirmationModal').classList.add('hidden');
+                  window.location.reload();
+                };
+              } else {
+                throw new Error('Error al eliminar el estudiante');
+              }
+            } catch (error) {
+              alert(error instanceof Error ? error.message : 'Ocurrió un error inesperado');
+            }
+          };
+        }
+      });
+
+      // **Cerrar modal de edición**
+      document.getElementById('closeEditModalButton').addEventListener('click', () => {
+        document.getElementById('editModal').classList.add('hidden');
+      });
+
+      // **Actualizar Estudiante**
+      document.getElementById('editForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const data = new FormData(document.getElementById('editForm'));
+        const estudianteActualizado = {
+          nombre: data.get('nombre'),
+          apellido: data.get('apellido'),
+          email: data.get('email'),
+          fechaNacimiento: data.get('fechaNacimiento'),
+          telefono: data.get('telefono'),
+        };
+
         try {
-          const response = await fetch(`http://localhost:8002/api/estudiantes/${estudianteId}`);
-          const estudiante = await response.json();
+          const response = await fetch(`${API_URL}/${estudianteId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(estudianteActualizado),
+          });
 
-          // Rellenar el formulario con los datos del estudiante
-          document.getElementById('editNombre').value = estudiante.nombre;
-          document.getElementById('editApellido').value = estudiante.apellido;
-          document.getElementById('editEmail').value = estudiante.email;
-          document.getElementById('editFechaNacimiento').value = estudiante.fechaNacimiento;
-          document.getElementById('editTelefono').value = estudiante.telefono;
+          if (response.ok) {
+            document.getElementById('editModal').classList.add('hidden');
+            document.getElementById('editConfirmationModal').classList.remove('hidden');
 
-          // Mostrar el modal de edición
-          editModal.classList.remove('hidden');
+            document.getElementById('closeEditConfirmationModalButton').addEventListener('click', () => {
+              document.getElementById('editConfirmationModal').classList.add('hidden');
+              window.location.reload();
+            });
+          } else {
+            throw new Error('Error al actualizar el estudiante');
+          }
         } catch (error) {
-          alert('Error al cargar los datos del estudiante');
+          alert(error instanceof Error ? error.message : 'Ocurrió un error inesperado');
         }
       });
-    });
 
-    // Cerrar el modal de edición
-    closeEditModalButton.addEventListener('click', () => {
-      editModal.classList.add('hidden');
-    });
-
-    // Manejar el envío del formulario de edición
-    editForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const data = new FormData(editForm);
-      const estudianteActualizado = {
-        nombre: data.get('nombre'),
-        apellido: data.get('apellido'),
-        email: data.get('email'),
-        fechaNacimiento: data.get('fechaNacimiento'),
-        telefono: data.get('telefono'),
-      };
-
-      try {
-        const response = await fetch(`http://localhost:8002/api/estudiantes/${estudianteId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(estudianteActualizado),
-        });
-
-        if (response.ok) {
-          // Mostrar el modal de confirmación de edición
-          editConfirmationModal.classList.remove('hidden');
-          editModal.classList.add('hidden'); // Cerrar el modal de edición
-
-          // Cerrar el modal de confirmación y recargar la página
-          closeEditConfirmationModalButton.addEventListener('click', () => {
-            editConfirmationModal.classList.add('hidden');
-            window.location.reload(); // Recargar la página para ver los cambios
-          });
-        } else {
-          throw new Error('Error al actualizar el estudiante');
-        }
-      } catch (error) {
-        alert(error instanceof Error ? error.message : 'Ocurrió un error inesperado');
-      }
-    });
-
-    // Manejar el clic en el botón "Eliminar"
-    deleteButtons.forEach((button) => {
-      button.addEventListener('click', () => {
-        estudianteId = button.getAttribute('data-id');
-
-        // Mostrar el modal de confirmación de eliminación
-        confirmDeleteModal.classList.remove('hidden');
-      });
-    });
-
-    // Cancelar la eliminación
-    cancelDeleteButton.addEventListener('click', () => {
-      confirmDeleteModal.classList.add('hidden');
-    });
-
-    // Confirmar la eliminación
-    confirmDeleteButton.addEventListener('click', async () => {
-      try {
-        const response = await fetch(`http://localhost:8002/api/estudiantes/${estudianteId}`, {
-          method: 'DELETE',
-        });
-
-        if (response.ok) {
-          // Mostrar el modal de confirmación de eliminación
-          confirmDeleteModal.classList.add('hidden');
-          deleteConfirmationModal.classList.remove('hidden');
-
-          // Cerrar el modal de confirmación y recargar la página
-          closeDeleteConfirmationModalButton.addEventListener('click', () => {
-            deleteConfirmationModal.classList.add('hidden');
-            window.location.reload(); // Recargar la página para ver los cambios
-          });
-        } else {
-          throw new Error('Error al eliminar el estudiante');
-        }
-      } catch (error) {
-        alert(error instanceof Error ? error.message : 'Ocurrió un error inesperado');
-      }
-    });
-
-    // Cerrar el modal de confirmación de eliminación
-    closeDeleteConfirmationModalButton.addEventListener('click', () => {
-      deleteConfirmationModal.classList.add('hidden');
-    });
+    } catch (error) {
+      listaEstudiantes.innerHTML = `<p class="text-red-500">Error al cargar los estudiantes.</p>`;
+    }
   });
 </script>
