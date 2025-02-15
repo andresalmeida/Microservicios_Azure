@@ -42,34 +42,40 @@ public class CursoServiceImpl implements CursoService {
     }
 
     @Override
-    public Optional<Estudiante> asignarEstudiante(Estudiante estudiante, Long id) {
-        Optional<Curso> optional = repository.findById(id);
+    public Optional<Estudiante> matricularEstudiante(Estudiante estudiante, Long cursoId) {
+        Optional<Curso> optional = repository.findById(cursoId);
         if (optional.isPresent()) {
             Estudiante estudianteTemp = clientRest.buscarporId(estudiante.getId());
 
             Curso curso = optional.get();
             CursoEstudiante cursoEstudiante = new CursoEstudiante();
-
             cursoEstudiante.setEstudiante_id(estudianteTemp.getId());
 
             curso.addCursoEstudiante(cursoEstudiante);
             repository.save(curso);
-            //return Optional.of(estudianteTemp);
+
+            return Optional.of(estudianteTemp);
         }
         return Optional.empty();
     }
 
-//    @Override
-//    public Optional<Estudiante> crearEstudiante(Estudiante estudiante, Long id) {
-//        Optional<Curso> optional = repository.findById(id);
-//        if (optional.isPresent()) {
-//            Estudiante estudianteTemp = clientRest.crear(estudiante);
-//            Curso curso = optional.get();
-//            CursoEstudiante cursoEstudiante = new CursoEstudiante();
-//            cursoEstudiante.setEstudiante_id(estudianteTemp.getId());
-//            curso.addCursoEstudiante(cursoEstudiante);
-//            repository.save(curso);
-//        }
-//        return Optional.empty();
-//    }
+    @Override
+    public Optional<Estudiante> desmatricularEstudiante(Long estudianteId, Long cursoId) {
+        Optional<Curso> optional = repository.findById(cursoId);
+        if (optional.isPresent()) {
+            Curso curso = optional.get();
+            CursoEstudiante cursoEstudiante = curso.getCursoEstudiantes()
+                    .stream()
+                    .filter(ce -> ce.getEstudiante_id().equals(estudianteId))
+                    .findFirst()
+                    .orElse(null);
+
+            if (cursoEstudiante != null) {
+                curso.removeCursoEstudiante(cursoEstudiante);
+                repository.save(curso);
+                return Optional.of(clientRest.buscarporId(estudianteId));
+            }
+        }
+        return Optional.empty();
+    }
 }

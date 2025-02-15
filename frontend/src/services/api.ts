@@ -22,15 +22,15 @@ export interface CursoEstudiante {
 }
 
 // URLs base de los microservicios (ajuste para funcionar en local y Docker)
-const BASE_URL_ESTUDIANTES =
-  import.meta.env?.VITE_API_ESTUDIANTES && import.meta.env?.VITE_API_ESTUDIANTES !== "undefined"
-    ? import.meta.env.VITE_API_ESTUDIANTES
-    : "http://localhost:8002/api/estudiantes";
+const isBrowser = typeof window !== "undefined";
 
-const BASE_URL_CURSOS =
-  import.meta.env?.VITE_API_CURSOS && import.meta.env?.VITE_API_CURSOS !== "undefined"
-    ? import.meta.env.VITE_API_CURSOS
-    : "http://localhost:8003/api/cursos";
+const BASE_URL_ESTUDIANTES = isBrowser && window.location.hostname === "localhost"
+  ? "http://localhost:8002/api/estudiantes"
+  : import.meta.env.VITE_API_ESTUDIANTES || "http://localhost:8002/api/estudiantes";
+
+const BASE_URL_CURSOS = isBrowser && window.location.hostname === "localhost"
+  ? "http://localhost:8003/api/cursos"
+  : import.meta.env.VITE_API_CURSOS || "http://localhost:8003/api/cursos";
 
 // Función para obtener cursos (evita llamada en tiempo de build)
 export const getCursos = async (): Promise<Curso[]> => {

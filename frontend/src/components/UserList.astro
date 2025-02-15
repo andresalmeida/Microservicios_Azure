@@ -1,41 +1,56 @@
 ---
-import { getEstudiantes } from '../services/api';
 import BackToHome from '../components/BackToHome.astro';
-
-// Obtener la lista de estudiantes
-const estudiantes = await getEstudiantes();
 ---
 
 <BackToHome />
 
-<ul class="space-y-4">
-  {estudiantes.map((estudiante) => (
-    <li class="p-4 border rounded-lg shadow-sm">
-      <div class="flex justify-between items-center">
-        <div>
-          <h3 class="text-lg font-semibold">{estudiante.nombre} {estudiante.apellido}</h3>
-          <p class="text-gray-600">{estudiante.email}</p>
-          <p class="text-gray-600">Teléfono: {estudiante.telefono}</p>
-        </div>
-        <div class="flex space-x-2">
-          <!-- Botón para abrir el modal de edición -->
-          <button
-            data-id={estudiante.id}
-            class="flex items-center space-x-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all edit-button"
-          >
-            Editar
-          </button>
-          <button
-            data-id={estudiante.id}
-            class="flex items-center space-x-2 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-all delete-button"
-          >
-            Eliminar
-          </button>
-        </div>
-      </div>
-    </li>
-  ))}
+<ul id="estudiantes-list" class="space-y-4">
+  <p class="text-gray-500">Cargando estudiantes...</p>
 </ul>
+
+<script is:inline>
+  document.addEventListener("DOMContentLoaded", async () => {
+    const listaEstudiantes = document.getElementById("estudiantes-list");
+
+    // Definir la URL fija en localhost
+    const API_URL = "http://localhost:8002/api/estudiantes";
+
+    try {
+      const response = await fetch(API_URL);
+      if (!response.ok) throw new Error("Error al obtener los estudiantes");
+
+      const estudiantes = await response.json();
+
+      if (!Array.isArray(estudiantes) || estudiantes.length === 0) {
+        listaEstudiantes.innerHTML = `<p class="text-gray-500">No hay estudiantes registrados.</p>`;
+        return;
+      }
+
+      listaEstudiantes.innerHTML = estudiantes.map(estudiante => `
+        <li class="p-4 border rounded-lg shadow-sm">
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="text-lg font-semibold">${estudiante.nombre} ${estudiante.apellido}</h3>
+              <p class="text-gray-600">${estudiante.email}</p>
+              <p class="text-gray-600">Teléfono: ${estudiante.telefono}</p>
+            </div>
+            <div class="flex space-x-2">
+              <button data-id="${estudiante.id}" class="flex items-center space-x-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all edit-button">
+                Editar
+              </button>
+              <button data-id="${estudiante.id}" class="flex items-center space-x-2 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-all delete-button">
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </li>
+      `).join("");
+
+    } catch (error) {
+      listaEstudiantes.innerHTML = `<p class="text-red-500">Error al cargar los estudiantes.</p>`;
+    }
+  });
+</script>
 
 
 <!-- Modal de Edición -->

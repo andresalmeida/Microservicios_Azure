@@ -1,34 +1,53 @@
 ---
-import { getCursos } from '../services/api';
 import BackToHome from '../components/BackToHome.astro';
-
-// Obtener la lista de cursos
-const cursos = await getCursos();
 ---
 
 <BackToHome />
 
-<ul class="space-y-4">
-  {cursos.map((curso) => (
-    <li class="p-4 border rounded-lg shadow-sm">
-      <div class="flex justify-between items-center">
-        <div>
-          <h3 class="text-lg font-semibold">{curso.nombre}</h3>
-          <p class="text-gray-600">{curso.descripcion}</p>
-          <p class="text-gray-600">Créditos: {curso.creditos}</p>
-        </div>
-        <div class="flex space-x-2">
-          <button
-            data-id={curso.id}
-            class="flex items-center space-x-2 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-all delete-button"
-          >
-            Eliminar
-          </button>
-        </div>
-      </div>
-    </li>
-  ))}
+<ul id="cursos-list" class="space-y-4">
+  <p class="text-gray-500">Cargando cursos...</p>
 </ul>
+
+<script is:inline>
+  document.addEventListener("DOMContentLoaded", async () => {
+    const listaCursos = document.getElementById("cursos-list");
+
+    // URL del API para obtener los cursos
+    const API_URL = "http://localhost:8003/api/cursos";
+
+    try {
+      const response = await fetch(API_URL);
+      if (!response.ok) throw new Error("Error al obtener los cursos");
+
+      const cursos = await response.json();
+
+      if (!Array.isArray(cursos) || cursos.length === 0) {
+        listaCursos.innerHTML = `<p class="text-gray-500">No hay cursos registrados.</p>`;
+        return;
+      }
+
+      listaCursos.innerHTML = cursos.map(curso => `
+        <li class="p-4 border rounded-lg shadow-sm">
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="text-lg font-semibold">${curso.nombre}</h3>
+              <p class="text-gray-600">${curso.descripcion}</p>
+              <p class="text-gray-600">Créditos: ${curso.creditos}</p>
+            </div>
+            <div class="flex space-x-2">
+              <button data-id="${curso.id}" class="flex items-center space-x-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all edit-button">
+                Editar
+              </button>
+            </div>
+          </div>
+        </li>
+      `).join("");
+
+    } catch (error) {
+      listaCursos.innerHTML = `<p class="text-red-500">Error al cargar los cursos.</p>`;
+    }
+  });
+</script>
 
 
 <!-- Modal de Confirmación de Eliminación (¿Estás seguro?) -->

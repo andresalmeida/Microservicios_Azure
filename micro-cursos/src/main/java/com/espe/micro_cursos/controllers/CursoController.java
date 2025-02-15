@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/api/cursos")
 public class CursoController {
@@ -64,18 +65,35 @@ public class CursoController {
         return ResponseEntity.notFound().build();
     }
 
-    @PutMapping("/asignar-estudiante/{cursoId}")
-    public ResponseEntity<?> asignarEstudiante(@RequestBody Estudiante estudiante, @PathVariable Long cursoId) {
+    @PostMapping("/matricular-estudiante/{cursoId}")
+    public ResponseEntity<?> matricularEstudiante(@RequestBody Estudiante estudiante, @PathVariable Long cursoId) {
         Optional<Estudiante> o;
         try {
-            o = service.asignarEstudiante(estudiante, cursoId);
+            o = service.matricularEstudiante(estudiante, cursoId);
         } catch (FeignException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Collections.singletonMap("mensaje", "No existe el usuario por" +
-                            " el id o error en la comunicacion: " + e.getMessage()));
+                            " el id o error en la comunicación: " + e.getMessage()));
         }
         if (o.isPresent()) {
             return ResponseEntity.status(HttpStatus.CREATED).body(o.get());
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+
+    @DeleteMapping("/desmatricular-estudiante/{cursoId}/estudiante/{estudianteId}")
+    public ResponseEntity<?> desmatricularEstudiante(@PathVariable Long cursoId, @PathVariable Long estudianteId) {
+        Optional<Estudiante> o;
+        try {
+            o = service.desmatricularEstudiante(estudianteId, cursoId);
+        } catch (FeignException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Collections.singletonMap("mensaje", "No existe el usuario por" +
+                            " el id o error en la comunicación: " + e.getMessage()));
+        }
+        if (o.isPresent()) {
+            return ResponseEntity.ok(o.get());
         }
         return ResponseEntity.notFound().build();
     }

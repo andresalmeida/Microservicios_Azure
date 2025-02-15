@@ -12,8 +12,8 @@ public interface CursoService {
     Curso save(Curso curso);
     void deleteById(Long id);
 
-    Optional<Estudiante> asignarEstudiante(Estudiante estudiante, Long id);
-    //Optional<Estudiante> crearEstudiante(Estudiante estudiante, Long id);
+    Optional<Estudiante> matricularEstudiante(Estudiante estudiante, Long cursoId);
+    Optional<Estudiante> desmatricularEstudiante(Long estudianteId, Long cursoId);
 
 
 }

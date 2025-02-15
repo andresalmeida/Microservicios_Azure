@@ -1,39 +1,63 @@
 ---
-import { getCursos } from '../services/api';
 import BackToHome from '../components/BackToHome.astro';
-
-// Obtener la lista de cursos
-const cursos = await getCursos();
 ---
 
 <BackToHome />
 
-<ul class="space-y-4">
-  {cursos.map((curso) => (
-    <li class="p-4 border rounded-lg shadow-sm">
-      <div class="flex justify-between items-center">
-        <div>
-          <h3 class="text-lg font-semibold">{curso.nombre}</h3>
-          <p class="text-gray-600">{curso.descripcion}</p>
-          <p class="text-gray-600">Créditos: {curso.creditos}</p>
-          <!-- Mostrar estudiantes matriculados -->
-          {curso.cursoEstudiantes && curso.cursoEstudiantes.length > 0 && (
-            <div class="mt-2">
-              <h4 class="text-sm font-semibold text-gray-700">Estudiantes matriculados:</h4>
-              <ul class="list-disc list-inside">
-                {curso.cursoEstudiantes.map((estudiante) => (
-                  <li class="text-sm text-gray-600">
-                    Estudiante ID: {estudiante.estudiante_id}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      </div>
-    </li>
-  ))}
+<ul id="matriculas-list" class="space-y-4">
+  <p class="text-gray-500">Cargando cursos y estudiantes matriculados...</p>
 </ul>
+
+<script is:inline>
+  document.addEventListener("DOMContentLoaded", async () => {
+    const listaMatriculas = document.getElementById("matriculas-list");
+
+    // URL de la API para obtener los cursos con sus estudiantes matriculados
+    const API_URL = "http://localhost:8003/api/cursos";
+
+    try {
+      const response = await fetch(API_URL);
+      if (!response.ok) throw new Error("Error al obtener los cursos");
+
+      const cursos = await response.json();
+
+      if (!Array.isArray(cursos) || cursos.length === 0) {
+        listaMatriculas.innerHTML = `<p class="text-gray-500">No hay cursos registrados.</p>`;
+        return;
+      }
+
+      listaMatriculas.innerHTML = cursos.map(curso => `
+        <li class="p-4 border rounded-lg shadow-sm">
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="text-lg font-semibold">${curso.nombre}</h3>
+              <p class="text-gray-600">${curso.descripcion}</p>
+              <p class="text-gray-600">Créditos: ${curso.creditos}</p>
+
+              <!-- Mostrar estudiantes matriculados -->
+              ${curso.cursoEstudiantes && curso.cursoEstudiantes.length > 0
+                ? `<div class="mt-2">
+                    <h4 class="text-sm font-semibold text-gray-700">Estudiantes matriculados:</h4>
+                    <ul class="list-disc list-inside">
+                      ${curso.cursoEstudiantes.map(estudiante => `
+                        <li class="text-sm text-gray-600">
+                          Estudiante ID: ${estudiante.estudiante_id}
+                        </li>
+                      `).join("")}
+                    </ul>
+                  </div>`
+                : `<p class="text-sm text-gray-500 mt-2">No hay estudiantes matriculados en este curso.</p>`
+              }
+            </div>
+          </div>
+        </li>
+      `).join("");
+
+    } catch (error) {
+      listaMatriculas.innerHTML = `<p class="text-red-500">Error al cargar los cursos y estudiantes.</p>`;
+    }
+  });
+</script>
 
 
 <!-- Formulario para matricular un estudiante -->
